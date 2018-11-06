@@ -28,9 +28,12 @@ remotecontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex
 remotecontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h
 remotecontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h
 remotecontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
+remotecontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
+remotecontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 remotecontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
-remotecontrol\main.o: ../Inc/can.h
+remotecontrol\main.o: ..\MDK-ARM\can.h
 remotecontrol\main.o: ../Inc/dma.h
+remotecontrol\main.o: ../Inc/tim.h
 remotecontrol\main.o: ../Inc/usart.h
 remotecontrol\main.o: ../Inc/gpio.h
 remotecontrol\main.o: .\bsp\bsp_uart.h

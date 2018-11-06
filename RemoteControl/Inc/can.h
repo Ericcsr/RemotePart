@@ -1,146 +1,81 @@
-/*
-Please refer to can.c for documentation.
-*/
-
-#ifndef __CAN_H
-#define __CAN_H
-
-/* ========== includes ========== */
-#include "main.h"
-#include "stm32f4xx_hal.h"
-/* ============================== */
-
-/* ========== headers ========== */
-extern CAN_HandleTypeDef hcan1;
-/* ============================= */
-
-/* ========== ids ========== */
-#define CAN_BUS2_MOTOR1_FEEDBACK_MSG_ID           0x201
-#define CAN_BUS2_MOTOR2_FEEDBACK_MSG_ID           0x202 
-#define CAN_BUS2_MOTOR3_FEEDBACK_MSG_ID           0x203
-#define CAN_BUS2_MOTOR4_FEEDBACK_MSG_ID           0x204
-#define CAN_BUS2_MOTOR5_FEEDBACK_MSG_ID           0x205
-#define CAN_BUS2_MOTOR6_FEEDBACK_MSG_ID           0x206
-#define CAN_BUS2_MOTOR7_FEEDBACK_MSG_ID 					0x207
-#define CAN_BUS2_MOTOR8_FEEDBACK_MSG_ID 					0x208
-/* ========================= */
-
-/* ========== error handling ========== */
-extern void _Error_Handler(char *, int);
-/* ==================================== */
-
-/* ========== CAN initialize functions ========== */
-void CAN_Initialize(void);
-/* ============================================== */
-
-/* ========== CAN user/transmit functions ========== */
-void CAN_SendMsg(CAN_HandleTypeDef* hcan,CAN_TxHeaderTypeDef *canTxHeader,uint8_t* canMsg);
-void set_CM_speed(int16_t cm1_iq,int16_t cm2_iq,int16_t cm3_iq,int16_t cm4_iq);
-/* ================================================= */
-
-/* ========== CAN receive functions ========== */
-void CanReceiveMsgProcess(CAN_RxHeaderTypeDef *rxHeader,uint8_t* msg);
-/* =========================================== */
-
-
-
-
-
-/* Stuff below this line is the new experimental way to use CAN */
-
-
-
-
-
-
-/* ========== smart CAN ========== */
-typedef struct Can
-{
-	/* ========== headers ========== */
-	CAN_TxHeaderTypeDef canTxHeader;
-	
-	/* ========== settings ========== */
-	uint32_t StdId;
-	uint32_t IDE;
-	uint32_t RTR;
-	uint32_t DLC;
-	uint32_t rx_StdId;
-	uint8_t* data;
-	int rx_buffer_size;
-} Can;
-/* =============================== */
-
-/* ========== smart CAN functions ========== */
-void Device_Initialize(Can* device,const uint32_t StdId, const uint32_t IDE, const uint32_t RTR, const uint32_t DLC, const uint32_t rx_StdId, const int rx_buffer_size);
-void Can_Transmit(Can* device,CAN_HandleTypeDef* hcan,uint8_t* canMsg);
-void Can_Receive(CAN_HandleTypeDef* hcan, uint8_t* canRxMsg);	// place this in can1/2_rx_isr
-void Device_Activate_Rx(Can* device);
-void test_smart_can(Can* device, CAN_HandleTypeDef* hcan,int16_t cm1_iq,int16_t cm2_iq,int16_t cm3_iq,int16_t cm4_iq);
-void Device_ResizeRxBuffer(Can* device, int rx_buffer_size);
-
-/* Below is to test the PID */
-#define SPEED_OUTPUT_ATTENUATION (1.0f)
-#define RATE_BUF_SIZE 6
-typedef struct{
-	int32_t raw_value;   									//???????????
-	int32_t last_raw_value;								//??????????
-	int32_t ecd_value;                       //????????????
-	int32_t diff;													//??????????
-	int32_t temp_count;                   //???
-	uint8_t buf_count;								//????buf?
-	int32_t ecd_bias;											//??????	
-	int32_t ecd_raw_rate;									//???????????????
-	float rate_buf[RATE_BUF_SIZE];	//buf,for filter
-	int32_t round_cnt;										//??
-	int32_t filter_rate;											//??
-	float ecd_angle;				//??
-	float last_ecd_angle;
-	float ecd_speed;
-}Encoder;
-
-typedef struct PID_Regulator_t
-{
-	float ref;
-	float fdb;
-	float err[2];
-	float output;
-	float last_output;
-	float kp;
-	float ki;
-	float kd;
-	float KpComponent;
-	float KiComponent;
-	float KdComponent;
-	float output_limit;
-	float windup_limit;
-	float max_step;
-	void (*Calc)(struct PID_Regulator_t*);
-	void (*Reset)(struct PID_Regulator_t*);
-	float Ki_Limit;
-}PID_Regulator_t;
-void PID_Calc(PID_Regulator_t *pid); 
-void PID_Reset(PID_Regulator_t *pid);
-#define CHASSIS_MOTOR_SPEED_PID_DEFAULT \
-{\
-	0,\
-	0,\
-	{0,0},\
-	0,\
-	0,\
-	80.0f,\
-	3.0f,\
-	5.0f,\
-	0,\
-	0,\
-	0,\
-	5000,\
-	0,\
-	800,\
-	&PID_Calc,\
-	&PID_Reset,\
-}\
-
-void set_Chassis_Pid_Speed(Can chassis, int cm1, int cm2, int cm3, int cm4);
-void GetEncoderBias(volatile Encoder *v,CAN_RxHeaderTypeDef *rxHeader,uint8_t* msg);
-void EncoderProcess(volatile Encoder *v, uint8_t* msg);
+/**
+  ******************************************************************************
+  * File Name          : CAN.h
+  * Description        : This file provides code for the configuration
+  *                      of the CAN instances.
+  ******************************************************************************
+  ** This notice applies to any and all portions of this file
+  * that are not between comment pairs USER CODE BEGIN and
+  * USER CODE END. Other portions of this file, whether 
+  * inserted by the user or by software development tools
+  * are owned by their respective copyright owners.
+  *
+  * COPYRIGHT(c) 2018 STMicroelectronics
+  *
+  * Redistribution and use in source and binary forms, with or without modification,
+  * are permitted provided that the following conditions are met:
+  *   1. Redistributions of source code must retain the above copyright notice,
+  *      this list of conditions and the following disclaimer.
+  *   2. Redistributions in binary form must reproduce the above copyright notice,
+  *      this list of conditions and the following disclaimer in the documentation
+  *      and/or other materials provided with the distribution.
+  *   3. Neither the name of STMicroelectronics nor the names of its contributors
+  *      may be used to endorse or promote products derived from this software
+  *      without specific prior written permission.
+  *
+  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  *
+  ******************************************************************************
+  */
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __can_H
+#define __can_H
+#ifdef __cplusplus
+ extern "C" {
 #endif
+
+/* Includes ------------------------------------------------------------------*/
+#include "stm32f4xx_hal.h"
+#include "main.h"
+
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
+
+extern CAN_HandleTypeDef hcan1;
+
+/* USER CODE BEGIN Private defines */
+
+/* USER CODE END Private defines */
+
+extern void _Error_Handler(char *, int);
+
+void MX_CAN1_Init(void);
+
+/* USER CODE BEGIN Prototypes */
+
+/* USER CODE END Prototypes */
+
+#ifdef __cplusplus
+}
+#endif
+#endif /*__ can_H */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -41,6 +41,7 @@
 #include "stm32f4xx_hal.h"
 #include "can.h"
 #include "dma.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -55,11 +56,13 @@
 extern rc_info_t rc;
 char buf[200];
 int count;
-/* USER CODE END PV */
 uint8_t canRxMsg[8];
+static void MX_CAN1_Init(void);
+/* USER CODE END PV */
+
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_CAN1_Init(void);
+
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
@@ -98,36 +101,29 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  //MX_DMA_Init();
-  //MX_USART6_UART_Init();
-  //MX_USART1_UART_Init();
+  MX_DMA_Init();
+  MX_USART6_UART_Init();
+  MX_USART1_UART_Init();
   MX_CAN1_Init();
-  CAN_Initialize();
-	/* USER CODE BEGIN 2 */
+	CAN_Initialize();
+  MX_TIM6_Init();
+  /* USER CODE BEGIN 2 */
 	//led_off();
 	/* open dbus uart receive it */
 	dbus_uart_init();
-  /* USER CODE END 2 */
-  Can chassis;
+	Can chassis;
 	Device_Initialize(&chassis,0x200, CAN_ID_STD, CAN_RTR_DATA, 8, 0x201, 8);
+  /* USER CODE END 2 */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
 
   /* USER CODE END WHILE */
-  set_Chassis_Pid_Speed(chassis, 500, 500, 500, 500);
+
   /* USER CODE BEGIN 3 */
-		
-	/*	sprintf(buf, "CH1: %4d  CH2: %4d  CH3: %4d  CH4: %4d  SW1: %1d  SW2: %1d \n", rc.ch1, rc.ch2, rc.ch3, rc.ch4, rc.sw1, rc.sw2);
-		HAL_UART_Transmit(&huart6, (uint8_t *)buf, (COUNTOF(buf) - 1), 55);
-		HAL_Delay(50);	
-			
-		if (count==10)
-		{
-			HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin);
-			count=0;
-		}*/
+		set_Chassis_Pid_Speed(chassis, 500, 500, 500, 500);
   }
   /* USER CODE END 3 */
 
@@ -190,9 +186,7 @@ void SystemClock_Config(void)
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
-/* USER CODE BEGIN 4 */
-
-/* USER CODE END 4 */
+/* CAN1 init function */
 static void MX_CAN1_Init(void)
 {
 
@@ -214,6 +208,11 @@ static void MX_CAN1_Init(void)
   }
 
 }
+
+/* USER CODE BEGIN 4 */
+
+/* USER CODE END 4 */
+
 /**
   * @brief  This function is executed in case of error occurrence.
   * @param  file: The file name as string.

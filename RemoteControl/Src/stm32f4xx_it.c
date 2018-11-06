@@ -34,22 +34,24 @@
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx.h"
 #include "stm32f4xx_it.h"
-#include "can.h"
+
 /* USER CODE BEGIN 0 */
 #include "bsp_uart.h"
+#include "can.h"
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
 extern CAN_HandleTypeDef hcan1;
-extern DMA_HandleTypeDef hdma_usart1_rx;
-extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef huart6;
 extern uint8_t canRxMsg[8];
 extern uint8_t canTxMsg0[8];
 extern uint8_t canTxMsg1[8];
 extern CAN_TxHeaderTypeDef can1TxHeader0;
 extern CAN_TxHeaderTypeDef can1TxHeader1;
 extern CAN_RxHeaderTypeDef can1RxHeader;
+extern DMA_HandleTypeDef hdma_usart1_rx;
+extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart6;
+
 /******************************************************************************/
 /*            Cortex-M4 Processor Interruption and Exception Handlers         */ 
 /******************************************************************************/
